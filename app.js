@@ -18,7 +18,14 @@
   }
   $("app").hidden = false;
 
-  var sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  var sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
+    auth: {
+      flowType: "implicit",      // link mágico volta com a sessão no hash da URL
+      detectSessionInUrl: true,  // detecta e aplica a sessão ao voltar do e-mail
+      persistSession: true,
+      autoRefreshToken: true
+    }
+  });
 
   var STATUS_LABEL = { ativo: "Ativo", dev: "Em desenvolvimento", off: "Descontinuado" };
   var ICON_LINK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>';
