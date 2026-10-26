@@ -336,27 +336,26 @@
     document.body.style.overflow = "";
   }
 
-  function enviarLink(ev) {
+  function entrarComSenha(ev) {
     ev.preventDefault();
     var email = $("l-email").value.trim();
-    if (!email) return;
+    var senha = $("l-senha").value;
+    if (!email || !senha) return;
     var btn = $("login-enviar");
-    btn.disabled = true; btn.textContent = "Enviando…";
-    sb.auth.signInWithOtp({
-      email: email,
-      options: { shouldCreateUser: false, emailRedirectTo: window.location.href.split("#")[0] }
-    }).then(function (res) {
-      btn.disabled = false; btn.textContent = "Enviar link";
+    btn.disabled = true; btn.textContent = "Entrando…";
+    sb.auth.signInWithPassword({ email: email, password: senha }).then(function (res) {
+      btn.disabled = false; btn.textContent = "Entrar";
       if (res.error) {
         var m = res.error.message || "";
-        var msg = /not allowed|signups|not found|disabled/i.test(m)
-          ? "E-mail não autorizado. Peça a um administrador para liberar seu acesso no Supabase."
-          : "Não foi possível enviar: " + m;
+        var msg = /invalid login|credentials|invalid/i.test(m)
+          ? "E-mail ou senha incorretos."
+          : "Não foi possível entrar: " + m;
         toast(msg, "err");
         return;
       }
+      $("l-senha").value = "";
       fecharLogin();
-      toast("Link de acesso enviado para " + email + ". Confira seu e-mail.", "ok");
+      toast("Tudo certo! Você já pode editar.", "ok");
     });
   }
 
@@ -377,7 +376,7 @@
   $("btn-sair").addEventListener("click", sair);
   $("login-close").addEventListener("click", fecharLogin);
   $("login-cancelar").addEventListener("click", fecharLogin);
-  $("login-form").addEventListener("submit", enviarLink);
+  $("login-form").addEventListener("submit", entrarComSenha);
   $("login-overlay").addEventListener("click", function (e) { if (e.target === $("login-overlay")) fecharLogin(); });
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Escape") return;

@@ -16,8 +16,8 @@ deploy é no **Vercel**.
 - `schema.sql` — cria a tabela `portais` e as permissões no Supabase.
 
 Qualquer pessoa com o link **lê** o catálogo. Para **cadastrar, editar ou
-remover** é preciso entrar com um e-mail autorizado (login por link mágico,
-via Supabase Auth). Você controla quem pode editar.
+remover** é preciso entrar com **e-mail e senha** (Supabase Auth). Você
+controla quem pode editar criando os usuários.
 
 ---
 
@@ -36,22 +36,17 @@ via Supabase Auth). Você controla quem pode editar.
 > e protegida pelas regras de RLS do `schema.sql`. **Nunca** use aqui a chave
 > `service_role` (essa é secreta).
 
-### 2. Liberar quem pode editar (login)
+### 2. Criar o seu login (e-mail + senha)
 
-A leitura é pública; cadastrar/editar/remover exige login por **link mágico**
-(o Supabase envia um link de acesso para o e-mail). Você controla quem entra:
+A leitura é pública; cadastrar/editar/remover exige entrar com e-mail e senha.
+Como em geral só você edita, basta criar um usuário:
 
-1. **Authentication → Providers → Email**: deixe habilitado (vem ligado por padrão).
-2. **Authentication → Sign In / Providers** (ou *Settings*): **desligue**
-   *"Allow new users to sign up"*. Assim só e-mails que você cadastrar entram.
-3. **Authentication → Users → Add user**: adicione o e-mail de cada pessoa que
-   poderá editar (use *Add user* com "Auto Confirm", ou *Invite*).
-4. **Authentication → URL Configuration**: em *Site URL* coloque a URL do site
-   no Vercel (ex.: `https://catalogo-portais.vercel.app`) e, em *Redirect URLs*,
-   adicione essa mesma URL e — para testar local — `http://localhost:3000`.
+1. No Supabase, vá em **Authentication → Users → Add user**.
+2. Preencha **e-mail** e **senha**, marque **Auto Confirm User** e crie.
+3. No site, clique em **Entrar para editar** e use esse e-mail e senha.
 
-No site, o botão **Entrar para editar** envia o link; ao clicar no link do
-e-mail, a pessoa volta logada e os controles de edição aparecem.
+Para liberar outra pessoa depois, crie outro usuário do mesmo jeito. Não
+precisa de link mágico nem configurar URLs de redirecionamento.
 
 ### 3. Preencher o `config.js`
 
@@ -95,9 +90,9 @@ npx serve .
 ## Segurança
 
 - A **leitura** do catálogo é pública (qualquer um com o link vê).
-- A **edição** exige login, e só e-mails que você cadastrar no Supabase
-  conseguem entrar (passo 2). As policies de RLS do [`schema.sql`](schema.sql)
-  barram qualquer escrita de quem não está autenticado.
+- A **edição** exige login, e só os usuários que você criar no Supabase
+  (e-mail + senha) conseguem entrar (passo 2). As policies de RLS do
+  [`schema.sql`](schema.sql) barram qualquer escrita de quem não está autenticado.
 - A chave `anon public` no `config.js` é segura de expor — ela não dá poder de
   escrita sozinha. Nunca coloque a chave `service_role` no projeto.
 - Para voltar ao modo aberto (sem login), use a alternativa no fim do

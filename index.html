@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Catálogo Atua</title>
   <meta name="description" content="Catálogo central dos portais do Atua — processos, regulatório, comercial e ferramentas.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23FF3D03'/%3E%3Crect x='7' y='7' width='8' height='8' rx='2' fill='white'/%3E%3Crect x='17' y='7' width='8' height='8' rx='2' fill='white'/%3E%3Crect x='7' y='17' width='8' height='8' rx='2' fill='white'/%3E%3Crect x='17' y='17' width='8' height='8' rx='2' fill='white' opacity='.5'/%3E%3C/svg%3E">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -16,7 +17,9 @@
   <!-- Tela de setup (aparece se o config.js ainda não foi preenchido) -->
   <div class="wrap setup" id="setup" hidden>
     <div class="card2">
-      <div class="brandline" style="margin-bottom:18px"><span class="dot"></span>Atua · nstech</div>
+      <div class="brandline" style="margin-bottom:18px">
+        <img class="brand-logo" src="LogoUrl.png" alt="Atua" width="112" height="30">
+      </div>
       <h2>Falta conectar o banco de dados</h2>
       <p style="color:var(--fg-dim);margin:0">Pra salvar os portais, preencha as credenciais do Supabase no arquivo <code>config.js</code>.</p>
       <ol>
@@ -33,7 +36,10 @@
   <div id="app" hidden>
     <header>
       <div class="wrap">
-        <div class="brandline"><span class="dot"></span>Atua · nstech</div>
+        <div class="brandline">
+          <img class="brand-logo" src="LogoUrl.png" alt="Atua" width="112" height="30">
+          <span class="brand-sep">·</span> nstech
+        </div>
         <div class="head-row">
           <div>
             <h1>Catálogo <span class="accent">de portais</span></h1>
@@ -175,16 +181,20 @@
         <h2 id="login-title">Entrar para editar</h2>
         <button class="modal-close" id="login-close" aria-label="Fechar">&times;</button>
       </div>
-      <form class="modal-body" id="login-form" autocomplete="off">
-        <p style="margin:0;color:var(--fg-dim);font-size:14px;line-height:1.6">Informe seu e-mail e enviamos um link de acesso. Só e-mails liberados por um administrador conseguem entrar; o resto apenas visualiza o catálogo.</p>
+      <form class="modal-body" id="login-form" autocomplete="on">
+        <p style="margin:0;color:var(--fg-dim);font-size:14px;line-height:1.6">Entre com seu e-mail e senha para editar o catálogo. Quem não entra apenas visualiza.</p>
         <div class="field">
           <label for="l-email">E-mail</label>
-          <input id="l-email" name="email" type="email" required placeholder="voce@nstech.com.br">
+          <input id="l-email" name="email" type="email" required autocomplete="username" placeholder="voce@nstech.com.br">
+        </div>
+        <div class="field">
+          <label for="l-senha">Senha</label>
+          <input id="l-senha" name="password" type="password" required autocomplete="current-password" placeholder="••••••••">
         </div>
         <div class="modal-foot">
           <div class="right">
             <button type="button" class="btn btn-ghost" id="login-cancelar">Cancelar</button>
-            <button type="submit" class="btn btn-primary" id="login-enviar">Enviar link</button>
+            <button type="submit" class="btn btn-primary" id="login-enviar">Entrar</button>
           </div>
         </div>
       </form>

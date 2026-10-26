@@ -126,6 +126,8 @@ header { padding-block: 40px 28px; }
   width: 9px; height: 9px; border-radius: 50%;
   background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft);
 }
+.brand-logo { height: 30px; width: auto; display: block; }
+.brand-sep { color: var(--accent); margin-left: 2px; }
 .head-row {
   display: flex; align-items: flex-end; justify-content: space-between;
   gap: 20px; flex-wrap: wrap; margin-top: 16px;
