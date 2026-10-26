@@ -11,6 +11,6 @@
    ========================================================================== */
 
 window.ATUA_CONFIG = {
-  SUPABASE_URL: "",
-  SUPABASE_ANON_KEY: ""
+  SUPABASE_URL: "https://kllupnfyhtmnmfrhykaq.supabase.co",
+  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtsbHVwbmZ5aHRtbm1mcmh5a2FxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMjQ0MDgsImV4cCI6MjEwODYwMDQwOH0.uHKk3ILJEdpL2cglK-cJj4XWWRLiv5j0U8YuDt6x8Wc"
 };
