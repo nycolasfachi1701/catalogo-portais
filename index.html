@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Catálogo Atua</title>
+  <meta name="description" content="Catálogo central dos portais do Atua — processos, regulatório, comercial e ferramentas.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23FF3D03'/%3E%3Crect x='7' y='7' width='8' height='8' rx='2' fill='white'/%3E%3Crect x='17' y='7' width='8' height='8' rx='2' fill='white'/%3E%3Crect x='7' y='17' width='8' height='8' rx='2' fill='white'/%3E%3Crect x='17' y='17' width='8' height='8' rx='2' fill='white' opacity='.5'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Tela de setup (aparece se o config.js ainda não foi preenchido) -->
+  <div class="wrap setup" id="setup" hidden>
+    <div class="card2">
+      <div class="brandline" style="margin-bottom:18px"><span class="dot"></span>Atua · nstech</div>
+      <h2>Falta conectar o banco de dados</h2>
+      <p style="color:var(--fg-dim);margin:0">Pra salvar os portais, preencha as credenciais do Supabase no arquivo <code>config.js</code>.</p>
+      <ol>
+        <li>Crie um projeto grátis em <code>supabase.com</code>.</li>
+        <li>No painel do projeto, abra <b>Project Settings → API</b> e copie a <b>Project URL</b> e a chave <b>anon public</b>.</li>
+        <li>No <b>SQL Editor</b>, rode o conteúdo de <code>schema.sql</code> (cria a tabela e as permissões).</li>
+        <li>Cole a URL e a chave no arquivo <code>config.js</code> e faça o deploy.</li>
+      </ol>
+      <p style="color:var(--fg-mute);margin:18px 0 0;font-size:13px">O passo a passo completo está no <code>README.md</code> do projeto.</p>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="app" hidden>
+    <header>
+      <div class="wrap">
+        <div class="brandline"><span class="dot"></span>Atua · nstech</div>
+        <div class="head-row">
+          <div>
+            <h1>Catálogo <span class="accent">de portais</span></h1>
+          </div>
+          <button class="btn btn-primary" id="btn-novo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Cadastrar portal
+          </button>
+        </div>
+        <p class="lede">A capa única dos ambientes do Atua. Cada portal, com categoria, status e acesso — para o time encontrar o que precisa sem caçar link em conversa.</p>
+        <div class="counts">
+          <span><b id="c-total">—</b> portais</span>
+          <span><b id="c-ativos">—</b> ativos</span>
+          <span><b id="c-cat">—</b> categorias</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="wrap">
+        <label class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="q" type="search" placeholder="Buscar portal…" autocomplete="off" aria-label="Buscar portal">
+        </label>
+        <div class="filters" id="filters" role="group" aria-label="Filtrar por categoria"></div>
+        <button class="theme-toggle" id="theme" aria-label="Alternar tema" title="Alternar tema">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <main>
+      <div class="wrap">
+        <div class="state" id="loading"><div class="spinner"></div>Carregando catálogo…</div>
+        <div class="state big" id="empty" hidden>
+          <h3>Nenhum portal cadastrado ainda</h3>
+          <p>Comece adicionando o primeiro portal do Atua — Portal de Processos, CIOT ANTT, a landing da consultoria, o que vier.</p>
+          <button class="btn btn-primary" id="btn-primeiro" style="margin:0 auto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Cadastrar primeiro portal
+          </button>
+        </div>
+        <div class="state" id="noresult" hidden>Nenhum portal encontrado para esse filtro.</div>
+        <div class="grid" id="grid" hidden></div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <span>Catálogo Atua · nstech</span>
+        <span id="foot-count"></span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal de cadastro/edição -->
+  <div class="overlay" id="overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head">
+        <h2 id="modal-title">Novo portal</h2>
+        <button class="modal-close" id="modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form class="modal-body" id="form" autocomplete="off">
+        <div class="field">
+          <label for="f-nome">Nome <span class="req">*</span></label>
+          <input id="f-nome" name="nome" required maxlength="80" placeholder="Ex.: Portal de Processos">
+        </div>
+        <div class="field row2">
+          <div class="field" style="gap:7px">
+            <label for="f-categoria">Categoria</label>
+            <input id="f-categoria" name="categoria" list="cats" maxlength="40" placeholder="Operação">
+            <datalist id="cats">
+              <option value="Operação"></option>
+              <option value="Regulatório"></option>
+              <option value="Comercial"></option>
+              <option value="Ferramentas internas"></option>
+              <option value="Portal de cliente"></option>
+            </datalist>
+          </div>
+          <div class="field" style="gap:7px">
+            <label for="f-status">Status</label>
+            <select id="f-status" name="status">
+              <option value="ativo">Ativo</option>
+              <option value="dev">Em desenvolvimento</option>
+              <option value="off">Descontinuado</option>
+            </select>
+          </div>
+        </div>
+        <div class="field row2">
+          <div class="field" style="gap:7px">
+            <label for="f-publico">Público</label>
+            <input id="f-publico" name="publico" list="pubs" maxlength="40" placeholder="Interno">
+            <datalist id="pubs">
+              <option value="Interno"></option>
+              <option value="Cliente"></option>
+              <option value="Leads"></option>
+              <option value="Operação / Cliente"></option>
+            </datalist>
+          </div>
+          <div class="field" style="gap:7px">
+            <label for="f-responsavel">Responsável</label>
+            <input id="f-responsavel" name="responsavel" maxlength="40" placeholder="Time ou pessoa">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-url">Endereço (URL)</label>
+          <input id="f-url" name="url" type="url" maxlength="300" placeholder="https://…">
+        </div>
+        <div class="field">
+          <label for="f-descricao">Descrição</label>
+          <textarea id="f-descricao" name="descricao" maxlength="280" placeholder="O que esse portal faz, em uma linha."></textarea>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-danger" id="btn-remover" hidden>Remover</button>
+          <div class="right">
+            <button type="button" class="btn btn-ghost" id="btn-cancelar">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="btn-salvar">Salvar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toasts" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
