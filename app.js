@@ -31,6 +31,7 @@
   var carregado = false;
   var editId = null;      // id do portal em edição, ou null para novo
   var confirmandoRemocao = false;
+  var podeEditar = false;  // true quando há sessão autenticada
 
   // ---------- util ----------
   function esc(s) {
@@ -142,8 +143,10 @@
       '<div class="card-foot card-foot-top">' +
         '<span class="url" title="' + esc(urlTxt) + '">' + esc(urlTxt) + "</span>" +
         '<div class="foot-actions">' +
-          '<button class="icon-btn" data-edit="' + esc(p.id) + '" aria-label="Editar" title="Editar">' + ICON_EDIT + "</button>" +
-          '<button class="icon-btn danger" data-del="' + esc(p.id) + '" aria-label="Remover" title="Remover">' + ICON_DEL + "</button>" +
+          (podeEditar
+            ? '<button class="icon-btn" data-edit="' + esc(p.id) + '" aria-label="Editar" title="Editar">' + ICON_EDIT + "</button>" +
+              '<button class="icon-btn danger" data-del="' + esc(p.id) + '" aria-label="Remover" title="Remover">' + ICON_DEL + "</button>"
+            : "") +
           go +
         "</div>" +
       "</div>" +
@@ -160,8 +163,10 @@
     });
 
     var grid = $("grid");
-    grid.innerHTML = lista.map(cardHTML).join("") +
-      '<button class="card ghost" id="ghost"><span class="plus">+</span><span>Cadastrar novo portal</span></button>';
+    var ghostHTML = podeEditar
+      ? '<button class="card ghost" id="ghost"><span class="plus">+</span><span>Cadastrar novo portal</span></button>'
+      : "";
+    grid.innerHTML = lista.map(cardHTML).join("") + ghostHTML;
 
     $("noresult").hidden = lista.length > 0 || portais.length === 0;
 
@@ -183,6 +188,10 @@
       $("empty").hidden = false;
       $("grid").hidden = true;
       $("noresult").hidden = true;
+      $("btn-primeiro").hidden = !podeEditar;
+      $("empty-text").textContent = podeEditar
+        ? "Comece adicionando o primeiro portal do Atua — Portal de Processos, CIOT ANTT, a landing da consultoria, o que vier."
+        : "Ainda não há portais no catálogo. Entre para editar e adicione o primeiro.";
     } else {
       $("empty").hidden = true;
       $("grid").hidden = false;
@@ -192,6 +201,7 @@
 
   // ---------- modal ----------
   function abrirModal(id) {
+    if (!podeEditar) { abrirLogin(); return; }
     editId = id || null;
     confirmandoRemocao = false;
     var p = editId ? portais.filter(function (x) { return String(x.id) === String(editId); })[0] : null;
@@ -235,6 +245,7 @@
 
   function salvar(ev) {
     ev.preventDefault();
+    if (!podeEditar) { toast("Entre para editar.", "err"); return; }
     var dados = coletar();
     if (!dados.nome) { toast("Dê um nome ao portal.", "err"); $("f-nome").focus(); return; }
 
@@ -297,6 +308,55 @@
     pendenteTimer = setTimeout(function () { pendenteDel = null; }, 4000);
   }
 
+  // ---------- auth ----------
+  function atualizaAuthUI(session) {
+    podeEditar = !!session;
+    var email = session && session.user ? (session.user.email || "") : "";
+    $("btn-novo").hidden = !podeEditar;
+    $("btn-entrar").hidden = podeEditar;
+    $("userchip").hidden = !podeEditar;
+    if (podeEditar) $("useremail").textContent = email;
+    if (!podeEditar && !$("overlay").hidden) fecharModal();
+  }
+
+  function abrirLogin() {
+    $("login-overlay").hidden = false;
+    document.body.style.overflow = "hidden";
+    setTimeout(function () { $("l-email").focus(); }, 30);
+  }
+  function fecharLogin() {
+    $("login-overlay").hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  function enviarLink(ev) {
+    ev.preventDefault();
+    var email = $("l-email").value.trim();
+    if (!email) return;
+    var btn = $("login-enviar");
+    btn.disabled = true; btn.textContent = "Enviando…";
+    sb.auth.signInWithOtp({
+      email: email,
+      options: { shouldCreateUser: false, emailRedirectTo: window.location.href.split("#")[0] }
+    }).then(function (res) {
+      btn.disabled = false; btn.textContent = "Enviar link";
+      if (res.error) {
+        var m = res.error.message || "";
+        var msg = /not allowed|signups|not found|disabled/i.test(m)
+          ? "E-mail não autorizado. Peça a um administrador para liberar seu acesso no Supabase."
+          : "Não foi possível enviar: " + m;
+        toast(msg, "err");
+        return;
+      }
+      fecharLogin();
+      toast("Link de acesso enviado para " + email + ". Confira seu e-mail.", "ok");
+    });
+  }
+
+  function sair() {
+    sb.auth.signOut().then(function () { toast("Você saiu.", ""); });
+  }
+
   // ---------- eventos ----------
   $("q").addEventListener("input", function () { busca = this.value; if (carregado && portais.length) renderGrid(); });
   $("btn-novo").addEventListener("click", function () { abrirModal(null); });
@@ -306,8 +366,16 @@
   $("btn-remover").addEventListener("click", removerNoModal);
   $("form").addEventListener("submit", salvar);
   $("overlay").addEventListener("click", function (e) { if (e.target === $("overlay")) fecharModal(); });
+  $("btn-entrar").addEventListener("click", abrirLogin);
+  $("btn-sair").addEventListener("click", sair);
+  $("login-close").addEventListener("click", fecharLogin);
+  $("login-cancelar").addEventListener("click", fecharLogin);
+  $("login-form").addEventListener("submit", enviarLink);
+  $("login-overlay").addEventListener("click", function (e) { if (e.target === $("login-overlay")) fecharLogin(); });
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !$("overlay").hidden) fecharModal();
+    if (e.key !== "Escape") return;
+    if (!$("overlay").hidden) fecharModal();
+    else if (!$("login-overlay").hidden) fecharLogin();
   });
 
   // tema
@@ -326,6 +394,14 @@
   } catch (e) {}
 
   // ---------- start ----------
+  sb.auth.onAuthStateChange(function (_event, session) {
+    atualizaAuthUI(session);
+    if (carregado) render();
+  });
+  sb.auth.getSession().then(function (res) {
+    atualizaAuthUI(res && res.data ? res.data.session : null);
+    if (carregado) render();
+  });
   carregar();
   assinarRealtime();
 })();

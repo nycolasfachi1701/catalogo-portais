@@ -15,9 +15,9 @@ deploy é no **Vercel**.
 - `config.js` — suas credenciais do Supabase (você preenche).
 - `schema.sql` — cria a tabela `portais` e as permissões no Supabase.
 
-Qualquer pessoa com o link lê o catálogo; na versão padrão (aberta), também
-pode cadastrar, editar e remover. Dá para travar a edição para usuários
-logados depois — veja o final do `schema.sql`.
+Qualquer pessoa com o link **lê** o catálogo. Para **cadastrar, editar ou
+remover** é preciso entrar com um e-mail autorizado (login por link mágico,
+via Supabase Auth). Você controla quem pode editar.
 
 ---
 
@@ -36,7 +36,24 @@ logados depois — veja o final do `schema.sql`.
 > e protegida pelas regras de RLS do `schema.sql`. **Nunca** use aqui a chave
 > `service_role` (essa é secreta).
 
-### 2. Preencher o `config.js`
+### 2. Liberar quem pode editar (login)
+
+A leitura é pública; cadastrar/editar/remover exige login por **link mágico**
+(o Supabase envia um link de acesso para o e-mail). Você controla quem entra:
+
+1. **Authentication → Providers → Email**: deixe habilitado (vem ligado por padrão).
+2. **Authentication → Sign In / Providers** (ou *Settings*): **desligue**
+   *"Allow new users to sign up"*. Assim só e-mails que você cadastrar entram.
+3. **Authentication → Users → Add user**: adicione o e-mail de cada pessoa que
+   poderá editar (use *Add user* com "Auto Confirm", ou *Invite*).
+4. **Authentication → URL Configuration**: em *Site URL* coloque a URL do site
+   no Vercel (ex.: `https://catalogo-portais.vercel.app`) e, em *Redirect URLs*,
+   adicione essa mesma URL e — para testar local — `http://localhost:3000`.
+
+No site, o botão **Entrar para editar** envia o link; ao clicar no link do
+e-mail, a pessoa volta logada e os controles de edição aparecem.
+
+### 3. Preencher o `config.js`
 
 Abra [`config.js`](config.js) e cole os dois valores:
 
@@ -47,7 +64,7 @@ window.ATUA_CONFIG = {
 };
 ```
 
-### 3. Publicar no Vercel
+### 4. Publicar no Vercel
 
 1. Em **https://vercel.com**, entre com o GitHub e clique **Add New → Project**.
 2. Importe o repositório **`catalogo-portais`**.
@@ -56,7 +73,7 @@ window.ATUA_CONFIG = {
    - Output Directory: *(vazio / raiz)*
 4. **Deploy**. Pronto — a cada `git push`, o Vercel republica sozinho.
 
-### 4. (Opcional) Atualização ao vivo entre pessoas
+### 5. (Opcional) Atualização ao vivo entre pessoas
 
 No Supabase, abra **Database → Replication** e habilite a tabela `portais`.
 Assim, uma mudança feita por alguém aparece na tela de quem já está com o site
@@ -77,7 +94,11 @@ npx serve .
 
 ## Segurança
 
-A configuração padrão é **aberta**: quem tem o link pode editar. Para um
-catálogo interno com URL não divulgada, costuma ser suficiente. Para restringir
-a edição a pessoas logadas, siga o bloco opcional no fim do [`schema.sql`](schema.sql)
-e ative o Supabase Auth.
+- A **leitura** do catálogo é pública (qualquer um com o link vê).
+- A **edição** exige login, e só e-mails que você cadastrar no Supabase
+  conseguem entrar (passo 2). As policies de RLS do [`schema.sql`](schema.sql)
+  barram qualquer escrita de quem não está autenticado.
+- A chave `anon public` no `config.js` é segura de expor — ela não dá poder de
+  escrita sozinha. Nunca coloque a chave `service_role` no projeto.
+- Para voltar ao modo aberto (sem login), use a alternativa no fim do
+  [`schema.sql`](schema.sql).

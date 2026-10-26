@@ -20,32 +20,32 @@ create table if not exists public.portais (
 alter table public.portais enable row level security;
 
 -- -----------------------------------------------------------------------------
--- PERMISSÕES — versão aberta (recomendada para começar)
--- Qualquer pessoa com o link do site pode ler E cadastrar/editar/remover.
--- Simples, sem login. Bom para um catálogo interno com URL não divulgada.
+-- PERMISSÕES — edição só para quem está logado
+-- Todo mundo lê o catálogo; apenas usuários autenticados (login por link
+-- mágico) podem cadastrar, editar e remover. Quem edita você controla
+-- liberando os e-mails no Supabase (veja o README).
 -- -----------------------------------------------------------------------------
 drop policy if exists "portais_select" on public.portais;
 drop policy if exists "portais_insert" on public.portais;
 drop policy if exists "portais_update" on public.portais;
 drop policy if exists "portais_delete" on public.portais;
 
+-- Leitura pública
 create policy "portais_select" on public.portais for select using (true);
-create policy "portais_insert" on public.portais for insert with check (true);
-create policy "portais_update" on public.portais for update using (true) with check (true);
-create policy "portais_delete" on public.portais for delete using (true);
+
+-- Escrita apenas para usuários autenticados
+create policy "portais_insert" on public.portais for insert to authenticated with check (true);
+create policy "portais_update" on public.portais for update to authenticated using (true) with check (true);
+create policy "portais_delete" on public.portais for delete to authenticated using (true);
 
 -- -----------------------------------------------------------------------------
--- (OPCIONAL) Travar a edição para quem estiver logado
--- Se mais tarde você quiser que só pessoas autenticadas editem (e todo mundo
--- apenas leia), ative o Supabase Auth, remova as policies de escrita acima e
--- rode estas no lugar. A leitura continua pública.
+-- (ALTERNATIVA) Versão totalmente aberta, sem login
+-- Se um dia quiser dispensar o login e deixar qualquer um editar, troque as
+-- três policies de escrita acima por estas:
 --
---   drop policy if exists "portais_insert" on public.portais;
---   drop policy if exists "portais_update" on public.portais;
---   drop policy if exists "portais_delete" on public.portais;
---   create policy "portais_insert" on public.portais for insert to authenticated with check (true);
---   create policy "portais_update" on public.portais for update to authenticated using (true) with check (true);
---   create policy "portais_delete" on public.portais for delete to authenticated using (true);
+--   create policy "portais_insert" on public.portais for insert with check (true);
+--   create policy "portais_update" on public.portais for update using (true) with check (true);
+--   create policy "portais_delete" on public.portais for delete using (true);
 -- -----------------------------------------------------------------------------
 
 -- (OPCIONAL) Atualização ao vivo entre abas/pessoas

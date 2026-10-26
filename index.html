@@ -38,10 +38,21 @@
           <div>
             <h1>Catálogo <span class="accent">de portais</span></h1>
           </div>
-          <button class="btn btn-primary" id="btn-novo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-            Cadastrar portal
-          </button>
+          <div class="authbar">
+            <span class="userchip" id="userchip" hidden>
+              <span class="udot"></span>
+              <span id="useremail"></span>
+              <button class="linkbtn" id="btn-sair">Sair</button>
+            </span>
+            <button class="btn btn-ghost" id="btn-entrar" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5M15 12H3"/></svg>
+              Entrar para editar
+            </button>
+            <button class="btn btn-primary" id="btn-novo" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              Cadastrar portal
+            </button>
+          </div>
         </div>
         <p class="lede">A capa única dos ambientes do Atua. Cada portal, com categoria, status e acesso — para o time encontrar o que precisa sem caçar link em conversa.</p>
         <div class="counts">
@@ -70,8 +81,8 @@
         <div class="state" id="loading"><div class="spinner"></div>Carregando catálogo…</div>
         <div class="state big" id="empty" hidden>
           <h3>Nenhum portal cadastrado ainda</h3>
-          <p>Comece adicionando o primeiro portal do Atua — Portal de Processos, CIOT ANTT, a landing da consultoria, o que vier.</p>
-          <button class="btn btn-primary" id="btn-primeiro" style="margin:0 auto">
+          <p id="empty-text">Comece adicionando o primeiro portal do Atua — Portal de Processos, CIOT ANTT, a landing da consultoria, o que vier.</p>
+          <button class="btn btn-primary" id="btn-primeiro" style="margin:0 auto" hidden>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
             Cadastrar primeiro portal
           </button>
@@ -151,6 +162,29 @@
           <div class="right">
             <button type="button" class="btn btn-ghost" id="btn-cancelar">Cancelar</button>
             <button type="submit" class="btn btn-primary" id="btn-salvar">Salvar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de login (link mágico) -->
+  <div class="overlay" id="login-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="login-title" style="max-width:430px">
+      <div class="modal-head">
+        <h2 id="login-title">Entrar para editar</h2>
+        <button class="modal-close" id="login-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form class="modal-body" id="login-form" autocomplete="off">
+        <p style="margin:0;color:var(--fg-dim);font-size:14px;line-height:1.6">Informe seu e-mail e enviamos um link de acesso. Só e-mails liberados por um administrador conseguem entrar; o resto apenas visualiza o catálogo.</p>
+        <div class="field">
+          <label for="l-email">E-mail</label>
+          <input id="l-email" name="email" type="email" required placeholder="voce@nstech.com.br">
+        </div>
+        <div class="modal-foot">
+          <div class="right">
+            <button type="button" class="btn btn-ghost" id="login-cancelar">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="login-enviar">Enviar link</button>
           </div>
         </div>
       </form>
