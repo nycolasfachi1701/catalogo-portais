@@ -10,9 +10,60 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="preload" as="image" href="LogoUrl.png">
+  <script>
+  (function () {
+    var h = document.documentElement;
+    h.className += " js";
+    /* Abertura com a logo: aparece uma vez por sessão do navegador.
+       Para rever, abra o site em uma nova aba ou use o endereço com ?intro no final. */
+    try {
+      var rever = /[?&]intro(=|&|$)/.test(location.search);
+      if (sessionStorage.getItem("atua-intro") && !rever) h.className += " sem-intro";
+      else sessionStorage.setItem("atua-intro", "1");
+    } catch (e) {}
+  })();
+  </script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+  <!-- Abertura com a logo (uma vez por sessão; clique ou tecla pula) -->
+  <div class="intro" id="intro" aria-hidden="true">
+    <div class="intro-logo">
+      <div class="intro-mark">
+        <span class="intro-cell" style="--c:0;--r:0"><img src="LogoUrl.png" alt=""></span>
+        <span class="intro-cell" style="--c:1;--r:0"><img src="LogoUrl.png" alt=""></span>
+        <span class="intro-cell" style="--c:2;--r:0"><img src="LogoUrl.png" alt=""></span>
+        <span class="intro-cell" style="--c:3;--r:0"><img src="LogoUrl.png" alt=""></span>
+        <span class="intro-cell" style="--c:0;--r:1"><img src="LogoUrl.png" alt=""></span>
+        <span class="intro-cell" style="--c:1;--r:1"><img src="LogoUrl.png" alt=""></span>
+        <span class="intro-cell" style="--c:2;--r:1"><img src="LogoUrl.png" alt=""></span>
+        <span class="intro-cell" style="--c:3;--r:1"><img src="LogoUrl.png" alt=""></span>
+        <span class="intro-cell" style="--c:0;--r:2"><img src="LogoUrl.png" alt=""></span>
+        <span class="intro-cell" style="--c:1;--r:2"><img src="LogoUrl.png" alt=""></span>
+        <span class="intro-cell" style="--c:2;--r:2"><img src="LogoUrl.png" alt=""></span>
+        <span class="intro-cell" style="--c:3;--r:2"><img src="LogoUrl.png" alt=""></span>
+      </div>
+      <img class="intro-inteira intro-simbolo" src="LogoUrl.png" alt="">
+      <img class="intro-inteira intro-palavra" src="LogoUrl.png" alt="">
+    </div>
+    <div class="intro-by">by <b>nstech</b></div>
+    <div class="intro-linha"><i></i></div>
+  </div>
+  <script>
+  /* Clique ou tecla pula a abertura; ao terminar, ela sai do documento */
+  (function () {
+    var intro = document.getElementById("intro");
+    if (!intro) return;
+    var pular = function () { document.documentElement.classList.add("sem-intro"); };
+    intro.addEventListener("click", pular);
+    document.addEventListener("keydown", pular, { once: true });
+    intro.addEventListener("animationend", function (e) {
+      if (e.animationName === "intro-sai") intro.remove();
+    });
+  })();
+  </script>
 
   <!-- Tela de setup (aparece se o config.js ainda não foi preenchido) -->
   <div class="wrap setup" id="setup" hidden>
